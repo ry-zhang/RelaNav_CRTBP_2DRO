@@ -1,0 +1,548 @@
+%--------------------------------------------------------------------------
+%
+%                       Plot RSS EKF results
+%
+%--------------------------------------------------------------------------
+%% 
+% Inputs:
+% simstep       simulation/measurement step in seconds
+% rsspos        RSS position estimation state vector
+% rssvel        RSS velocity estimation state vector
+% rssposunc     RSS position uncertainty vector
+% rssvelunc     RSS velocity uncertainty vector
+% ErrYfull      Full Estimation error vector
+% SigUncfull    Full Uncertainty vector
+%% 
+close all;
+% plotRela;
+
+xlist=linspace(1,ceil(simdur,simdur);
+% step=2.6667e-06*simstep;
+% T0_day=0.5*27.284429211881122;
+const
+step=1/(T0_day*86400)*simstep;
+% Markers=["1st", "2nd"];
+Markers=["DRO"];
+
+
+%% 绘制位置和速度残差（3D）
+% for ii=1:1
+%     figure()
+%     subplot(2,1,1);
+%     ss = size(structRss.rsspos,1);
+%     semilogy(real(structRss.rsspos(:,ii))*LU*1, LineWidth=2, Color ='r')
+%     hold on
+%     semilogy(real(structRss.rssposunc(:,ii))*LU*1, LineWidth=2, Color ='b')
+%     title(sprintf('SC $%s$ Position (3D)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+%     hold on;
+%     legend('位置残差','位置不确定度')
+% %     xticks(((1/4.343)/step)*xlist)
+%     xticks(((1/T0_day)/step)*xlist*8)
+%     xticklabels(string(xlist))
+%     xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+%     xlim([1 ss(1)+1])
+%     ylabel({['Estimation Error and Uncertainty'],['1$\sigma$ RSS, m']}, 'fontsize',14,'interpreter','latex')
+% 
+%     str =  " 3D PosResidual : "+ num2str(mean(structRss.rsspos(end-endpoint,1))*LU)+"(m)  "+" 3D PosUncertainty : "+ num2str(mean(structRss.rssposunc(end-endpoint,1))*LU)+"(m) ";
+%     text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+%   
+%     grid minor
+%     
+%     subplot(2,1,2);
+%     ss = size(structRss.rssvel,1);
+%     semilogy(real(structRss.rssvel(:,ii))*SU, LineWidth=2, Color ='r')
+%     hold on
+%     semilogy(real(structRss.rssvelunc(:,ii))*SU, LineWidth=2, Color ='b')
+%     title(sprintf('SC $%s$ Velocity (3D)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+%     hold on;
+%     legend('速度残差','速度不确定度')
+%     grid minor
+%     xticks(((1/T0_day)/step)*xlist*8)
+%     xticklabels(string(xlist))
+%     xlabel('Time since Epoch, days', 'fontsize', 14, 'interpreter', 'latex')
+%     xlim([1 ss(1)+1])
+%     ylabel({['Estimation Error and Uncertainty'], ['1$\sigma$ RSS, m/s']}, 'fontsize', 14, 'interpreter', 'latex')
+%     
+%     str =  " 3D VelResidual : "+ num2str(mean(structRss.rssvel(end-endpoint,1))*SU*1000)+"(mm/s)  "+" 3D VelUncertainty : "+ num2str(mean(structRss.rssvelunc(end-endpoint,1))*SU*1000)+"(mm/s) ";
+%     text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+% 
+% 
+% end
+% %状态转移矩阵误差
+% for ii=1:1
+%     figure()
+%     subplot(2,1,1);
+%     ss = size(structRss.pres,1);
+%     semilogy(real(structRss.pres(:,ii))*LU*1, LineWidth=2, Color ='r')
+%     hold on
+%     
+%     legend('状态转移矩阵pos误差')
+% %     xticks(((1/4.343)/step)*xlist)
+%     xticks(((1/T0_day)/step)*xlist*8)
+%     xticklabels(string(xlist))
+%     xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+%     xlim([1 ss(1)+1])
+%     ylabel({['Estimation Error and Uncertainty'],['1$\sigma$ RSS, m']}, 'fontsize',14,'interpreter','latex')
+%     grid minor
+%     
+%     subplot(2,1,2);
+%     ss = size(structRss.vres,1);
+%     semilogy(real(structRss.vres(:,ii))*SU, LineWidth=2, Color ='r')
+%     hold on
+%     semilogy(real(structRss.vres(:,ii))*SU, LineWidth=2, Color ='b')
+%     title(sprintf('SC $%s$ Velocity (3D)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+%     hold on;
+%     legend('状态转移矩阵vel误差')
+%     grid minor
+%     xticks(((1/T0_day)/step)*xlist*8)
+%     xticklabels(string(xlist))
+%     xlabel('Time since Epoch, days', 'fontsize', 14, 'interpreter', 'latex')
+%     xlim([1 ss(1)+1])
+%     ylabel({['Estimation Error and Uncertainty'], ['1$\sigma$ RSS, m/s']}, 'fontsize', 14, 'interpreter', 'latex')
+% 
+% end
+
+%% 绘制O-C残差图
+% O-C残差
+figure()
+subplot(3,1,1);
+sz=10;
+ss = size(structRss.rsspos,1);
+scatter(1:ss(1), structRss.rssposOC*LU, sz, 's', 'filled', 'r');
+xticks(((1/T0_day)/step)*xlist*8)
+xticklabels(string(xlist))
+xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+xlim([1 ss(1)+1])
+ylabel({['Range O-C value'],['m']}, 'fontsize',14,'interpreter','latex')
+title('Range O-C ', 'fontsize',16,'interpreter','latex')
+
+A_noNaN = structRss.rssposOC(~isnan(structRss.rssposOC));
+str = "Mean: "+"["+ num2str(mean(A_noNaN*LU))+"]  "+"RMS (1sigma): "+"[ "+num2str(rms(A_noNaN*LU))+"]  ";
+text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+
+subplot(3,1,2);
+sz=10;
+scatter(1:ss(1), structRss.rsseleOC, sz, 's', 'filled', 'r');
+xticks(((1/T0_day)/step)*xlist*8)
+xticklabels(string(xlist))
+xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+xlim([1 ss(1)+1])
+ylabel({['ele O-C value'],['°']}, 'fontsize',14,'interpreter','latex')
+title('ele O-C ', 'fontsize',16,'interpreter','latex')
+
+A_noNaN = structRss.rsseleOC(~isnan(structRss.rsseleOC));
+str = "Mean: "+"["+ num2str(mean(A_noNaN))+"]  "+"RMS (1sigma): "+"[ "+num2str(rms(A_noNaN))+"]  ";
+text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+
+subplot(3,1,3);
+sz=10;
+scatter(1:ss(1), structRss.rssaziOC, sz, 's', 'filled', 'r');
+xticks(((1/T0_day)/step)*xlist*8)
+xticklabels(string(xlist))
+xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+xlim([1 ss(1)+1])
+ylabel({['azi O-C value'],['°']}, 'fontsize',14,'interpreter','latex')
+title('azi O-C ', 'fontsize',16,'interpreter','latex')
+
+A_noNaN = structRss.rssaziOC(~isnan(structRss.rssaziOC));
+str = "Mean: "+"["+ num2str(mean(A_noNaN))+"]  "+"RMS (1sigma): "+"[ "+num2str(rms(A_noNaN))+"]  ";
+text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+%% 绘制位置和速度残差（3个方向）
+if fullerr == 1
+    % 位置和速度残差
+    for ii = 1:1
+        % 位置残差
+        figure()
+        subplot(2,1,1);
+        semilogy(real(abs(structRss.rssErrYfull(:,(1+6*(ii-1)):(3+6*(ii-1)))))*LU, LineWidth=2); 
+        title(sprintf('SC $%s$ Position Estimation Error', Markers(ii)), 'fontsize',16,'interpreter','latex')
+        hold on;
+        legend('X','Y','Z')
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        xlim([1 ss(1)+1])
+        ylabel({['Estimation Error'],['1$\sigma$ RSS, m']}, 'fontsize',14,'interpreter','latex')
+        str =  " PosResidual(3D/X/Y/Z) : "+ num2str(mean(structRss.rsspos(end-endpoint,1))*LU,'%.1f')+"/ "...
+            + num2str(mean(structRss.rssErrYfull(end-endpoint,1))*LU,'%.1f')+"/ "...
+            + num2str(mean(structRss.rssErrYfull(end-endpoint,2))*LU,'%.1f')+"/ "...
+            + num2str(mean(structRss.rssErrYfull(end-endpoint,3))*LU,'%.1f')+"(m)";
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+
+        % 速度残差
+        subplot(2,1,2);
+        semilogy(real( abs(structRss.rssErrYfull(:,(4+6*(ii-1)):(6+6*(ii-1))) ))*SU, LineWidth=2); 
+        title(sprintf('SC $%s$ Velocity Estimation Error', Markers(ii)), 'fontsize',16,'interpreter','latex')
+        hold on;
+        legend('VX','VY','VZ')
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        xlim([1 ss(1)+1])
+        ylabel({['Estimation Error'],['1$\sigma$ RSS, m/s']}, 'fontsize',14,'interpreter','latex')
+        str =  " VelResidual(3D/X/Y/Z) : "+ num2str(mean(structRss.rsspos(end-endpoint,1))*SU,'%.2e')+"/ "...
+            + num2str(mean(structRss.rssErrYfull(end-endpoint,4))*SU,'%.2e')+"/ "...
+            + num2str(mean(structRss.rssErrYfull(end-endpoint,5))*SU,'%.2e')+"/ "...
+            + num2str(mean(structRss.rssErrYfull(end-endpoint,6))*SU,'%.2e')+"(m/s)";
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+    end
+%%模态误差
+ for ii = 1:1
+        % 位置残差
+        figure()
+        subplot(3,2,1);
+        plot(real( structRss.rssErrCfull(:,1)), LineWidth=2,Color='b'); hold on;
+        plot(real( structRss.rssSigUncCfull(:,1)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        yticks(linspace(-2e-6, 2e-6, 5));
+        ylim([-2e-6, 2e-6]); % 手动设置范围
+        yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C1 Estimation Error']}, 'fontsize',14,'interpreter','latex');
+        str = "  C1 Residual:" + num2str(mean(structRss.rssErrCfull(end-endpoint:end,1)),'%.2e')+ "   C1 Uncertainty : " + num2str(mean(structRss.rssSigUncCfull(end-endpoint:end,1)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+
+        subplot(3,2,2);
+        plot(real( structRss.rssErrCfull(:,2)), LineWidth=2,Color='b'); hold on;
+        plot(real( structRss.rssSigUncCfull(:,2)), LineWidth=2,Color='r');  hold on;
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        yticks(linspace(-2e-6, 2e-6, 5));
+        ylim([-2e-6, 2e-6]); % 手动设置范围
+        yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6, 5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C2 Estimation Error']}, 'fontsize',14,'interpreter','latex') ;
+        str = "  C2 Residual:" + num2str(mean(structRss.rssErrCfull(end-endpoint:end,2)),'%.2e')  + "  C2 Uncertainty : " + num2str(mean(structRss.rssSigUncCfull(end-endpoint:end,2)),'%.2e');
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        legend('估计值','不确定度')
+        grid minor
+       
+
+        subplot(3,2,3);
+        plot(real(structRss.rssErrCfull(:,3)), LineWidth=2,Color='b'); hold on;
+        plot(real( structRss.rssSigUncCfull(:,3)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        yticks(linspace(-2e-6, 2e-6, 5));
+        ylim([-2e-6, 2e-6]); % 手动设置范围
+        yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6, 5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        ylabel({['C3 Estimation Error']}, 'fontsize',14,'interpreter','latex')
+        str = "  C3 Residual:" + num2str(mean(structRss.rssErrCfull(end-endpoint:end,3)),'%.2e')  + "  C3 Uncertainty : " + num2str(mean(structRss.rssSigUncCfull(end-endpoint:end,3)),'%.2e');
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+
+        subplot(3,2,4);
+        plot(real(structRss.rssErrCfull(:,4)), LineWidth=2,Color='b'); hold on;
+        plot(real( structRss.rssSigUncCfull(:,4)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        yticks(linspace(-4e-6, 4e-6, 5));
+        ylim([-4e-6, 4e-6]); % 手动设置范围
+        yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-4e-6, 4e-6, 5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        ylabel({['C4 Estimation Error']}, 'fontsize',14,'interpreter','latex')
+        str = "  C4 Residual:" + num2str(mean(structRss.rssErrCfull(end-endpoint:end,4)),'%.2e')  + "  C4 Uncertainty : " + num2str(mean(structRss.rssSigUncCfull(end-endpoint:end,4)),'%.2e');
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+
+        subplot(3,2,5);
+        plot(real(structRss.rssErrCfull(:,5)), LineWidth=2,Color='b'); hold on;
+        plot(real(structRss.rssSigUncCfull(:,5)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        yticks(linspace(-2e-6, 2e-6, 5));
+        ylim([-2e-6, 2e-6]); % 手动设置范围
+        yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6, 5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        ylabel({['C5 Estimation Error']}, 'fontsize',14,'interpreter','latex')
+        str = "  C5 Residual:" + num2str(mean(structRss.rssErrCfull(end-endpoint:end,5)),'%.2e')  + "  C5 Uncertainty : " + num2str(mean(structRss.rssSigUncCfull(end-endpoint:end,5)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+
+        subplot(3,2,6);
+        plot(real(structRss.rssErrCfull(:,6)), LineWidth=2,Color='b');hold on;
+        plot(real(structRss.rssSigUncCfull(:,6)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlim([1 ss(1)+1])
+        yticks(linspace(-2e-6, 2e-6, 5));
+        yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6, 5), 'UniformOutput', false));
+        ylim([-2e-6, 2e-6]); % 手动设置范围
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        ylabel({['C6 Estimation Error']}, 'fontsize',14,'interpreter','latex')
+        str = "  C6 Residual:" + num2str(mean(structRss.rssErrCfull(end-endpoint:end,6)),'%.2e') + "  C6 Uncertainty : " + num2str(mean(structRss.rssSigUncCfull(end-endpoint:end,6)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        hold on;
+        grid minor
+
+    end
+  
+for ii = 1:1
+      % 位置残差
+        figure()
+        subplot(3,2,1);
+        plot(real( structState.estC(:,1)), LineWidth=2,Color='b'); hold on;
+        plot(real( structState.trueC(:,1)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist)
+        xticklabels(string(xlist))
+%         yticks(linspace(-2e-6, 2e-6, 5));
+%         ylim([-2e-6, 2e-6]); % 手动设置范围
+%         yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C1 value']}, 'fontsize',14,'interpreter','latex');
+        str = "  C1 estimation value : " + num2str(mean( structState.estC(end-endpoint:end,1)),'%.2e')+ " C1 true value : " + num2str(mean( structState.trueC(end-endpoint:end,1)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        grid minor
+        
+        subplot(3,2,2);
+        plot(real( structState.estC(:,2)), LineWidth=2,Color='b'); hold on;
+        plot(real( structState.trueC(:,2)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist)
+        xticklabels(string(xlist))
+%         yticks(linspace(-2e-6, 2e-6, 5));
+%         ylim([-2e-6, 2e-6]); % 手动设置范围
+%         yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C2 value']}, 'fontsize',14,'interpreter','latex');
+        str = "  C2 estimation value : " + num2str(mean(structState.estC(end-endpoint:end,2)),'%.2e')+ "   C2 true value : " + num2str(mean(structState.trueC(end-endpoint:end,2)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+        legend('估计值','真实值')
+        grid minor
+
+        subplot(3,2,3);
+        plot(real( structState.estC(:,3)), LineWidth=2,Color='b'); hold on;
+        plot(real( structState.trueC(:,3)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist)
+        xticklabels(string(xlist))
+%         yticks(linspace(-2e-6, 2e-6, 5));
+%         ylim([-2e-6, 2e-6]); % 手动设置范围
+%         yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C3 value']}, 'fontsize',14,'interpreter','latex');
+        str = "  C3 estimation value : " + num2str(mean(structState.estC(end-endpoint:end,3)),'%.2e')+ "   C3 true value : " + num2str(mean(structState.trueC(end-endpoint:end,3)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+
+        grid minor
+
+         subplot(3,2,4);
+        plot(real( structState.estC(:,4)), LineWidth=2,Color='b'); hold on;
+        plot(real( structState.trueC(:,4)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist)
+        xticklabels(string(xlist))
+%         yticks(linspace(-2e-6, 2e-6, 5));
+%         ylim([-2e-6, 2e-6]); % 手动设置范围
+%         yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C4 value']}, 'fontsize',14,'interpreter','latex');
+        str = "  C4 estimation value :" + num2str(mean(structState.estC(end-endpoint:end,4)),'%.2e')+ "   C4 true value : " + num2str(mean(structState.trueC(end-endpoint:end,4)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+
+        grid minor
+
+         subplot(3,2,5);
+        plot(real( structState.estC(:,5)), LineWidth=2,Color='b'); hold on;
+        plot(real( structState.trueC(:,5)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist)
+        xticklabels(string(xlist))
+%         yticks(linspace(-2e-6, 2e-6, 5));
+%         ylim([-2e-6, 2e-6]); % 手动设置范围
+%         yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C5  value']}, 'fontsize',14,'interpreter','latex');
+        str = "  C5 estimation value:" + num2str(mean(structState.estC(end-endpoint:end,5)),'%.2e')+ "   C5 true value : " + num2str(mean(structState.trueC(end-endpoint:end,5)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+
+        grid minor
+
+         subplot(3,2,6);
+        plot(real( structState.estC(:,6)), LineWidth=2,Color='b'); hold on;
+        plot(real( structState.trueC(:,6)), LineWidth=2,Color='r'); hold on;
+        xticks(((1/T0_day)/step)*xlist)
+        xticklabels(string(xlist))
+%         yticks(linspace(-2e-6, 2e-6, 5));
+%         ylim([-2e-6, 2e-6]); % 手动设置范围
+%         yticklabels(arrayfun(@(v) sprintf('%.1e', v), linspace(-2e-6, 2e-6,5), 'UniformOutput', false));
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex');
+        ylabel({['C6 value']}, 'fontsize',14,'interpreter','latex');
+        str = "  C6 estimation value:" + num2str(mean(structState.estC(end-endpoint:end,6)),'%.2e')+ "   C6 true value : " + num2str(mean(structState.trueC(end-endpoint:end,6)),'%.2e') ;
+        text('String',str,'HorizontalAlignment','center','Units','normalized','position',[0.5,0.96],'FontSize',12,'FontWeight','Bold','FontName','Times New Roman');
+
+        grid minor
+
+end
+end
+
+%% 绘制位置和速度不确定度（3个方向）
+if fullunc == 1
+    % 位置和速度不确定度
+    for ii=1:1
+        figure()
+        % 位置不确定度
+      
+        semilogy(real(abs( structRss.rssSigUncCfull(:,(1+6*(ii-1)):(6+6*(ii-1))) )), LineWidth=2); 
+        title(sprintf('C Uncertainty', Markers(ii)), 'fontsize',16,'interpreter','latex')
+        hold on;
+        legend('C1','C2','C3','C4','C5','C6')
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        xlim([1 ss(1)+1])
+        ylabel({' C Uncertainty'}, 'fontsize',14,'interpreter','latex')
+
+
+        grid minor
+%         % 速度不确定度
+%         subplot(2,1,2);
+%         semilogy(real(abs( structRss.rssSigUncCfull(:,(4+6*(ii-1)):(6+6*(ii-1))) )), LineWidth=2); 
+%         title(sprintf('SC $%s$ Velocity Uncertainty', Markers(ii)), 'fontsize',16,'interpreter','latex')
+%         hold on;
+%         legend('VX','VY','VZ')
+%         xticks(((1/T0_day)/step)*xlist*8)
+%         xticklabels(string(xlist))
+%         xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+%         xlim([1 ss(1)+1])
+%         ylabel({['Uncertainty'],['1$\sigma$ RSS, m/s']}, 'fontsize',14,'interpreter','latex')
+%         grid minor
+    end
+end
+
+%% 绘制CRLB下限图
+%%绘制CRLB下限序列（3D）
+if structRss.CRLB==1
+    for ii=1:1
+        figure()
+        subplot(2,1,1);
+        semilogy(real(structRss.rssCRLBpos(:,ii))*LU*1, LineWidth=2, Color ='r')
+        title(sprintf('SC $%s$ Position (CRLB 3D)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+        hold on;
+        legend('位置不确定度')
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        xlim([1 ss(1)+1])
+        % 设置 y 轴为对数坐标
+        set(gca, 'YScale', 'log');
+        
+%         % 设置 y 轴刻度
+        % 设置 y 轴刻度为对数坐标，5个对数刻度
+        y_min = min(real(structRss.rssCRLBpos(:,ii)*LU*1));
+        y_max = max(real(structRss.rssCRLBpos(:,ii)*LU*1));
+
+        
+        % 生成5个对数刻度点
+        yticks(logspace(log10(y_min), log10(y_max), 5));
+
+       % 获取当前y轴刻度并自定义格式
+        ytick_labels = yticks;  % 获取y轴刻度值
+        ytick_labels = arrayfun(@(x) sprintf('10^{%d}', round(log10(x))), ytick_labels, 'UniformOutput', false);
+        
+        % 设置y轴刻度标签
+        yticklabels(ytick_labels);
+        ylabel({['Uncertainty'],['1$\sigma$ RSS, m']}, 'fontsize',14,'interpreter','latex');
+        grid minor
+        
+        subplot(2,1,2);
+        semilogy(real(structRss.rssCRLBvel(:,ii))*SU, LineWidth=2, Color ='b')
+        title(sprintf('SC $%s$ Velocity (CRLB 3D)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+        hold on;
+        legend('速度不确定度')
+        grid minor
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize', 14, 'interpreter', 'latex')
+        xlim([1 ss(1)+1])
+        % 设置 y 轴为对数坐标
+        set(gca, 'YScale', 'log');
+        
+%         % 设置 y 轴刻度
+        % 设置 y 轴刻度为对数坐标，5个对数刻度
+        y_min = min(real(structRss.rssCRLBvel(:,ii)*SU));
+        y_max = max(real(structRss.rssCRLBvel(:,ii)*SU));
+        % 确保最小值大于零，因为对数函数不能作用于负数或零
+        y_min = max(y_min, eps);  % eps 是 MATLAB 中最小的正数，防止零值传入
+        y_max = max(y_max, eps);  % 同样对最大值也做类似处理
+        
+        % 生成5个对数刻度点
+        yticks(logspace(log10(y_min), log10(y_max), 5));
+
+       % 获取当前y轴刻度并自定义格式
+        ytick_labels = yticks;  % 获取y轴刻度值
+        ytick_labels = arrayfun(@(x) sprintf('10^{%d}', round(log10(x))), ytick_labels, 'UniformOutput', false);
+        
+        % 设置y轴刻度标签
+        yticklabels(ytick_labels);
+        ylabel({['Uncertainty'], ['1$\sigma$ RSS, m/s']}, 'fontsize', 14, 'interpreter', 'latex')
+
+
+        figure()
+        subplot(2,1,1);
+        semilogy(real(structRss.rssCRLBCN(:,ii))*1, LineWidth=2, Color ='r')
+        title(sprintf('CN (CRLB)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+        hold on;
+        legend('条件数')
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize',14,'interpreter','latex')
+        xlim([1 ss(1)+1])
+     
+        % 设置 y 轴刻度为对数形式
+        % 设置 y 轴为对数坐标
+        set(gca, 'YScale', 'log');
+        
+%         % 设置 y 轴刻度
+        % 设置 y 轴刻度为对数坐标，5个对数刻度
+        y_min = min(real(structRss.rssCRLBCN(:,ii)));
+        y_max = max(real(structRss.rssCRLBCN(:,ii)));
+        
+        % 生成5个对数刻度点
+        yticks(logspace(log10(y_min), log10(y_max), 5));
+
+       % 获取当前y轴刻度并自定义格式
+        ytick_labels = yticks;  % 获取y轴刻度值
+        ytick_labels = arrayfun(@(x) sprintf('10^{%d}', round(log10(x))), ytick_labels, 'UniformOutput', false);
+        
+        % 设置y轴刻度标签
+        yticklabels(ytick_labels);
+        ylabel({'CRLB CN'}, 'fontsize',14,'interpreter','latex')
+        grid minor
+        
+        subplot(2,1,2);
+        semilogy(real(structRss.rssCRLBOI(:,ii)), LineWidth=2, Color ='b')
+        title(sprintf('OI (CRLB)', Markers(ii)), 'fontsize', 16, 'interpreter', 'latex')
+        hold on;
+        legend('最小特征值')
+        grid minor
+        xticks(((1/T0_day)/step)*xlist*8)
+        xticklabels(string(xlist))
+        xlabel('Time since Epoch, days', 'fontsize', 14, 'interpreter', 'latex')
+        xlim([1 ss(1)+1])
+        % 设置 y 轴为对数坐标
+        set(gca, 'YScale', 'log');
+        
+%         % 设置 y 轴刻度
+        % 设置 y 轴刻度为对数坐标，5个对数刻度
+        y_min = min(real(structRss.rssCRLBOI(:,ii)));
+        y_max = max(real(structRss.rssCRLBOI(:,ii)));
+        % 确保最小值大于零，因为对数函数不能作用于负数或零
+        y_min = max(y_min, eps);  % eps 是 MATLAB 中最小的正数，防止零值传入
+        y_max = max(y_max, eps);  % 同样对最大值也做类似处理
+        
+        % 生成5个对数刻度点
+        yticks(logspace(log10(y_min), log10(y_max), 5));
+
+       % 获取当前y轴刻度并自定义格式
+        ytick_labels = yticks;  % 获取y轴刻度值
+        ytick_labels = arrayfun(@(x) sprintf('10^{%d}', round(log10(x))), ytick_labels, 'UniformOutput', false);
+        
+        % 设置y轴刻度标签
+        yticklabels(ytick_labels);
+        
+        ylabel({'CRLB OI'}, 'fontsize', 14, 'interpreter', 'latex')
+    end
+end
+
